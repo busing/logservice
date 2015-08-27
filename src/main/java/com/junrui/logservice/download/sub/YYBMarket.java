@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.htmlparser.Node;
 import org.htmlparser.Parser;
 import org.htmlparser.filters.AndFilter;
 import org.htmlparser.filters.HasAttributeFilter;
@@ -31,10 +30,9 @@ public class YYBMarket extends MarketDownLoad {
 			AndFilter af=new AndFilter(new TagNameFilter("div"), new HasAttributeFilter("class", "det-ins-num"));
 			Parser parser = new Parser((new URL(url)).openConnection()); 
 			NodeList nl= parser.parse(af);
-			for(int i=0;i<nl.size();i++)
+			if(nl!=null && nl.size()>0)
 			{
-				Node n=nl.elementAt(i);
-				return n.toPlainTextString();
+				 return nl.elementAt(0).toPlainTextString();
 			}
 		} catch (ParserException e) {
 			e.printStackTrace();
@@ -45,8 +43,13 @@ public class YYBMarket extends MarketDownLoad {
 		}
 		return "";
 	}
-	
-	
+
+	@Override
+	public int getDownloadCount(String text)
+	{
+		text=text.replaceAll("人下载","");
+		return Integer.parseInt(text);
+	}
 	
 
 }
