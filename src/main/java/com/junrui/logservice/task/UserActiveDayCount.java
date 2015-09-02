@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
-
 import org.springframework.stereotype.Component;
-
 import com.junrui.logreport.util.DateUtil;
 import com.junrui.logservice.dao.BaseDao;
 import com.junrui.logservice.util.SpringBeanFactory;
@@ -24,7 +22,7 @@ public class UserActiveDayCount extends BaseDao {
 	public List<Map<String, Object>> count()
 	{
 		Calendar cal=Calendar.getInstance();
-		cal.add(Calendar.DATE, -1);
+		cal.add(Calendar.DATE, -7);
 		String dayTime=DateUtil.getCurrentDayStr(cal);
 		StringBuffer sql=new StringBuffer(" select count(user_id) active_count,client_os,client_type,channel_id,day_time from "); 
 		sql.append(" (select user_id,client_os,client_type,channel_id,day_time from t_action_log "); 
@@ -47,17 +45,18 @@ public class UserActiveDayCount extends BaseDao {
 	{
 		if(data!=null && data.size()>0)
 		{
-			String sql="insert into t_activeuser_daycount  (client_os,client_type,channel_id,active_count,day_time) values(?,?,?,?,?)";
+			String sql="insert into t_activeuser_daycount  (client_os,client_type,channel_id,active_count,day_time,create_time) values(?,?,?,?,?,?)";
 			List<Object[]> batchArgs=new ArrayList<Object[]>();
 			Object[] param;
 			for (Map<String, Object> map : data)
 			{
-				param=new Object[5];
+				param=new Object[6];
 				param[0]=map.get("client_os").toString();
 				param[1]=map.get("client_type").toString();
 				param[2]=map.get("channel_id").toString();
 				param[3]=map.get("active_count").toString();
 				param[4]=map.get("day_time").toString();
+				param[5]=DateUtil.getCurrentLongTime();
 				batchArgs.add(param);
 			}
 			this.getDbHandle().batchUpdate(sql, batchArgs);
@@ -68,7 +67,7 @@ public class UserActiveDayCount extends BaseDao {
 	{
 		SpringBeanFactory.init("E:\\workspace\\eclipse\\logservice\\src\\main\\resource\\applicationContext.xml");
 		UserActiveDayCount uad=(UserActiveDayCount)SpringBeanFactory.getBusinessOjbect(UserActiveDayCount.class);
-		System.out.println(uad.count());
+		uad.saveResult(uad.count());
 	}
 
 }
